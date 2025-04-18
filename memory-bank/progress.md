@@ -4,7 +4,7 @@
 
 ### Foundational Setup
 1.  **Project Structure:** Basic FastAPI project layout established.
-2.  **Version Control:** Git repository setup on GitHub.
+2.  **Version Control:** Git repository setup on GitHub with proper commit history.
 3.  **Memory Bank:** All core memory bank files updated to reflect the Document Processing with RAG and Template Suggestion focus.
 4.  **Containerization:** Basic Dockerfile and `docker-compose.yml` exist.
 5.  **Template Examples:** Sample templates stored in the `/templates` directory.
@@ -16,6 +16,31 @@
 1.  **FastAPI Application:** Initialized the main app instance with `/file` and `/chat` endpoints.
 2.  **Environment Configuration:** Updated `.env` and `.env.example` files for Supabase integration.
 3.  **Database Schema:** Created SQL migration for document chunks and template metadata tables.
+4.  **Project Scope:** Clarified and aligned all documentation with the correct RAG-based document processing focus.
+5.  **Code Cleanup:** Removed unused files and components not related to our project scope.
+
+### Version Control Workflow
+1.  **Repository:** GitHub repository at `lucasvnd/rag_agent` manages project code.
+2.  **Branch Strategy:** 
+    * Protected `main` branch that requires pull request reviews before merging
+    * Feature branches for all new development (`feature/feature-name`)
+    * Bugfix branches for fixes (`fix/issue-description`)
+    * Release branches when preparing releases (`release/vX.Y.Z`)
+3.  **Commit Strategy:**
+    * Small, frequent commits that represent atomic changes
+    * Conventional Commits format: `type(scope): message` (e.g., `feat(api): add file upload endpoint`)
+    * Commit types: feat, fix, docs, style, refactor, test, chore
+    * Each commit should leave the codebase in a working state
+4.  **Pull Request Process:**
+    * Descriptive PR titles and descriptions
+    * Link PRs to issues when applicable
+    * Code review required before merging
+    * Squash and merge option for cleaner history
+5.  **Recent Commits:**
+    * Update `productContext.md` to align with RAG-based document processing
+    * Update project to focus on document processing with RAG and template suggestions
+    * Clean: Remove unused files and RAG-specific code
+    * Refactor: Align memory bank with Document Template Management System scope
 
 ## What's Left to Build
 
