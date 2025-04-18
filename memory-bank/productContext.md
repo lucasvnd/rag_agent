@@ -5,6 +5,7 @@ This document outlines the "why" behind the Document Template Management System 
 ## 1. Project Purpose & Vision
 
 The core purpose of this project is to create a system that allows users to manage document templates efficiently. The vision is to enable users to easily create, store, retrieve, and populate templates with dynamic data, streamlining document generation processes. This system will integrate with a chat interface (like Slack) to facilitate template selection and data input.
+**CORRECTED VERSION: users will be able to send documents through our front web interface, which will call the /file endpoint, where it will store their documents in the supabase vector store database table. From that the users will ask the agent we are bulding to analyze the document and suggest document templates creation, using the templates from the /templates folder**
 
 ## 2. Problem Statement
 
@@ -25,15 +26,15 @@ The system should provide the following core capabilities:
     -   Store templates securely.
     -   List and search available templates.
     -   Define and manage variables/placeholders within templates.
--   **Variable Extraction:**
+-   **Variable Extraction:** **remove**
     -   Automatically identify predefined variables (e.g., `{{variable_name}}`) within uploaded templates.
     -   Store the list of variables associated with each template.
 -   **Document Generation:**
     -   Allow users to select a template.
-    -   Prompt users (potentially via chat) for values corresponding to the template's variables.
-    -   Populate the selected template with the provided values.
+    -   Prompt users (potentially via chat) for values corresponding to the template's variables. **remove**
+    -   Populate the selected template with the provided values. **from the document stored in the vector store**
     -   Generate the final document in its original format (or potentially PDF).
--   **Chat Integration (e.g., Slack):**
+-   **Chat Integration (e.g., Slack):** **remove completely**
     -   Users can interact with the system via chat commands.
     -   List available templates via chat.
     -   Initiate document generation by selecting a template via chat.

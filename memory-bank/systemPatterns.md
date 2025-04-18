@@ -5,41 +5,43 @@
 ### Container Architecture (Conceptual)
 ```mermaid
 graph TD
-    User[User via Chat Client] --> ChatService[Chat Service API (e.g., Slack)]
-    ChatService --> API[API Gateway / Load Balancer (e.g., Traefik)]
-    API --> DocGenService[DocGen Service (FastAPI App)]
-    DocGenService --> DB[(Database - PostgreSQL)]
-    DocGenService --> FileStore[File Storage (Local/S3)]
+    User[User via Web Interface] --> API[API Gateway / Load Balancer (e.g., Traefik)]
+    API --> DocService[Document Processing Service (FastAPI App)]
+    DocService --> SupabaseDB[(Supabase Vector Database)]
+    DocService --> FileStore[Template Storage (Local Volume)]
 ```
 
 1.  **Components**
-    *   **Chat Service API:** External interface for the chat platform (e.g., Slack API) where users interact.
-    *   **API Gateway / Load Balancer:** (Optional but recommended for production) Manages incoming API requests, routing, SSL termination (e.g., Traefik).
-    *   **DocGen Service:** The main application container handling business logic, template management, variable extraction, and document generation.
-    *   **Database:** Stores template metadata, variable lists, potentially user information (e.g., PostgreSQL).
-    *   **File Storage:** Stores the actual template files (e.g., local volume mount, cloud storage like S3).
+    *   **Web Interface:** External interface where users upload documents and interact with the system. **THIS IS NOT PART OF OUR PROJECT, THIS BE DEVELOPED SEPARATELY**
+    *   **API Gateway / Load Balancer:** Manages incoming API requests, routing, SSL termination (e.g., Traefik).
+    *   **Document Processing Service:** The main application container handling document processing, template analysis, and RAG integration.
+    *   **Supabase Vector Database:** Stores document chunks, embeddings, and metadata for RAG operations.
+    *   **Template Storage:** Stores the document templates (in the /templates directory).
 
 2.  **Communication Flow**
-    *   User sends command via Chat Client.
-    *   Chat Service sends event/request to DocGen Service (likely via webhook handled by the API Gateway).
-    *   DocGen Service processes the request (listing templates, initiating generation).
-    *   DocGen Service interacts with Database for metadata.
-    *   DocGen Service interacts with File Storage for template files.
-    *   DocGen Service interacts back with Chat Service API to prompt user for variables or deliver results.
+    *   User uploads document or sends chat request via Web Interface.
+    *   API Gateway routes request to the Document Processing Service.
+    *   For document uploads (/file endpoint):
+        *   Document is processed, chunked, and embedded.
+        *   Chunks and embeddings are stored in Supabase.
+    *   For chat interactions (/chat endpoint):
+        *   User query is processed, embeddings retrieved from Supabase.
+        *   Document Processing Service analyzes content and suggests templates.
+        *   Response is returned to the user.
 
 ## Design Patterns
 
 ### Container Patterns
 *(These remain generally applicable for containerized deployment)*
-1.  **Sidecar Pattern:** For logging, monitoring, etc., alongside the main DocGen Service container.
+1.  **Sidecar Pattern:** For logging, monitoring, etc., alongside the main Document Processing Service container.
 2.  **Ambassador Pattern:** If using a service mesh or complex proxy setup.
 3.  **Multi-stage Build:** Optimize Docker image for development, testing, and production.
 
 ### Application Patterns
-1.  **Repository Pattern:** Abstract data access for templates (metadata in DB, files in File Storage).
-2.  **Service Layer Pattern:** Encapsulate core business logic (template operations, document generation, chat interaction logic).
-3.  **Strategy Pattern:** Potentially used for handling different template file types (DOCX, MD, TXT) or different variable replacement logic.
-4.  **Unit of Work Pattern:** Manage database transactions, especially when updating metadata and potentially storing generated document info.
+1.  **Repository Pattern:** Abstract data access for documents and templates.
+2.  **Service Layer Pattern:** Encapsulate core business logic (document processing, embedding generation, template analysis).
+3.  **Strategy Pattern:** Potentially used for handling different document file types and template suggestions.
+4.  **Unit of Work Pattern:** Manage database transactions, especially when storing document chunks and embeddings.
 
 ## Component Relationships
 
@@ -53,11 +55,11 @@ graph LR
 ```
 
 1. Layer Responsibilities
-   - API: Request handling
-   - Service: Business logic (Template management, Doc generation, Chat interaction)
-   - Repository: Data access (DB metadata, File Storage access)
-   - Storage: Persistence (PostgreSQL, File System/S3)
-   - External: Chat Service API (e.g., Slack)
+   - API: Request handling (/file and /chat endpoints)
+   - Service: Business logic (Document processing, RAG, Template analysis)
+   - Repository: Data access (Supabase, Template files)
+   - Storage: Persistence (Supabase Vector DB, File System)
+   - External: Potential external services like authentication
 
 2. Cross-cutting Concerns
    - Logging
@@ -69,10 +71,10 @@ graph LR
 
 ### Container Orchestration
 1. Service Deployment
-   - Single replica
-   - Rolling updates
-   - Health checks
+   - Single replica deployment on Docker Swarm on VPS
+   - Rolling updates with health checks
    - Auto-recovery
+   - Resource constraints
 
 2. Network Configuration
    - Overlay network
@@ -81,9 +83,9 @@ graph LR
    - SSL termination
 
 3. State Management
-   - Stateless design preferred for DocGen Service (state managed in DB/File Store).
-   - External state store (Database, File Storage).
-   - Temporary storage for intermediate generation steps if needed.
+   - Stateless design for Document Processing Service
+   - External state store (Supabase Vector DB)
+   - Template files stored in a volume mount
 
 ### High Availability
 1. Fault Tolerance
@@ -93,7 +95,7 @@ graph LR
    - Error recovery
 
 2. Scalability
-   - Horizontal scaling
+   - Horizontal scaling potential
    - Load distribution
    - Resource optimization
    - Connection pooling
@@ -102,9 +104,8 @@ graph LR
 
 ### Access Control
 1. Authentication
-   - Potentially via Chat Service (validating Slack user/token).
-   - API Keys for direct API access (if applicable).
-   - User authentication layer (Future Phase).
+   - API Keys for direct API access (if applicable)
+   - User authentication layer (Future Phase)
 
 2. Authorization
    - Resource permissions
@@ -114,14 +115,14 @@ graph LR
 
 ### Data Protection
 1. Transport Security
-   - TLS between Chat Service <-> API Gateway <-> DocGen Service.
-   - Secure headers.
-   - Certificate management.
+   - TLS between Web Interface <-> API Gateway <-> Document Processing Service
+   - Secure headers
+   - Certificate management
 
 2. Storage Security
-   - Secure configuration for File Storage (e.g., S3 bucket policies).
-   - Database access controls.
-   - Consider encryption at rest for sensitive templates/data (if required).
+   - Secure configuration for Supabase
+   - Template storage access controls
+   - Consider encryption at rest for sensitive documents (if required)
 
 ## Monitoring Patterns
 
@@ -186,7 +187,7 @@ graph LR
    - Response cache
    - Data cache
    - Template cache
-   - Query cache
+   - Embedding cache
 
 2. Resource Management
    - Connection pooling

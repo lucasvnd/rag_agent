@@ -3,15 +3,16 @@
 ## Core Technologies
 -   **Programming Language:** Python 3.11+
 -   **Web Framework:** FastAPI
--   **Database:** PostgreSQL (potentially using SQLAlchemy ORM)
--   **Template Processing Libs:**
+-   **Vector Database:** Supabase with pgvector extension
+-   **Document Processing Libs:**
     -   `python-docx` (for DOCX manipulation)
-    -   Standard text/string formatting (for MD/TXT)
-    -   Templating Engine (e.g., Jinja2 - if complex logic needed beyond simple replacement)
--   **Chat Integration:** `slack_sdk` (or equivalent for chosen platform)
--   **File Storage:** Local filesystem (initially) or Cloud Storage (e.g., AWS S3, GCS)
+    -   `PyPDF2` or `pdfplumber` (for PDF processing)
+    -   Standard text/string formatting (for TXT)
+-   **Document Storage:** Supabase with vector embeddings
+-   **Template Storage:** Local filesystem via Docker volume
 -   **Containerization:** Docker
--   **Reverse Proxy/Gateway:** Traefik (Optional, recommended for deployment)
+-   **Orchestration:** Docker Swarm (for deployment on VPS)
+-   **Reverse Proxy/Gateway:** Traefik (for routing)
 
 ## Development Environment
 -   Python 3.11
@@ -33,40 +34,57 @@
     *   *Needs adjustment based on actual load*
 
 3.  **Networking**
-    *   Docker network (e.g., bridge for Compose, overlay for Swarm)
+    *   Docker network (bridge for Compose, overlay for Swarm)
     *   Internal service discovery
-    *   Traefik integration for routing (if used)
+    *   Traefik integration for routing
     *   Health check endpoints (`/health`)
 
 4.  **Storage**
-    *   **Database:** Volume mount for PostgreSQL data persistence.
-    *   **File Storage:** Volume mount for local template files or configured credentials for cloud storage.
+    *   **Supabase:** External vector database for document storage and embeddings.
+    *   **Template Storage:** Volume mount for local template files (/templates directory).
     *   **Logging:** stdout/stderr captured by Docker, potentially volume for log files if needed.
 
 ## Deployment Architecture
-1.  **Orchestration:** Docker Compose (for simplicity) or Docker Swarm/Kubernetes (for scalability)
-    *   DocGen Service container
-    *   Database container (PostgreSQL)
-    *   Optional: Traefik container
-    *   Configuration via `docker-compose.yml` or equivalent.
+1.  **Orchestration:** Docker Swarm for deployment on VPS
+    *   Document Processing Service container
+    *   Optional: Traefik container for routing
+    *   Configuration via Docker Swarm stack
 
-2. Docker Swarm
-   - Single replica (scalable)
+2. Docker Swarm Setup
+   - Single replica (potentially scalable)
    - Rolling updates with health checks
    - Automatic rollback on failure
    - Resource constraints and reservations
 
-2. Service Configuration
+3. Service Configuration
    - Environment variables from .env
-   - Secrets management (planned)
+   - Secrets management (for API keys)
    - Health monitoring
    - Logging and rotation
 
-3. Load Balancing
+4. Load Balancing
    - Traefik as reverse proxy
    - Dynamic routing
-   - SSL termination (planned)
+   - SSL termination
    - Service discovery
+
+## API Endpoints
+1. Document Upload
+   - Path: `/file`
+   - Methods: POST
+   - Functionality: Upload documents for processing, chunking, and embedding
+   - Authentication: API key or JWT (future implementation)
+
+2. Chat Interaction
+   - Path: `/chat`
+   - Methods: POST
+   - Functionality: Interact with processed documents, analyze content, suggest templates
+   - Authentication: API key or JWT (future implementation)
+
+3. Health Monitoring
+   - Path: `/health`
+   - Methods: GET
+   - Functionality: Service health check
 
 ## Development Workflow
 1. Local Development
@@ -82,10 +100,9 @@
    - Resource usage monitoring
 
 3. Deployment
-   - CI/CD pipeline (planned)
-   - Automated builds
+   - Manual deployment to Docker Swarm on VPS
    - Version tagging
-   - Registry push/pull
+   - Stack deployment
 
 ## Security Considerations
 1. Container Security
@@ -97,12 +114,12 @@
 2. Network Security
    - Internal network isolation
    - Traefik secure headers
-   - Rate limiting (planned)
+   - Rate limiting
    - SSL/TLS encryption
 
 3. Access Control
    - Environment-based configuration
-   - Secrets management (planned)
+   - Secrets management
    - Network policy enforcement
    - Service authentication
 
@@ -121,24 +138,23 @@
 
 ## Dependencies
 1.  **Runtime**
-    *   Python packages from `requirements.txt` (FastAPI, SQLAlchemy, python-docx, slack_sdk, etc.)
-    *   System libraries needed by Python packages (e.g., `libxml2` for `python-docx`)
-    *   External service connections (Slack API, Database, File Storage)
+    *   Python packages from `requirements.txt` (FastAPI, OpenAI, python-docx, supabase, etc.)
+    *   System libraries needed by Python packages
+    *   External service connections (Supabase, potentially other APIs)
     *   Environment variables (`.env` file)
 
 2.  **Infrastructure**
     *   Docker Engine
-    *   Docker Compose / Swarm / Kubernetes
-    *   Traefik (if used)
-    *   PostgreSQL Server
-    *   File Storage System (Local FS or Cloud)
+    *   Docker Swarm
+    *   Traefik
+    *   Supabase Account and Vector Database
 
 ## Known Limitations
 1. Resource Constraints
-   - Memory limits
+   - Memory limits for document processing
    - CPU allocation
-   - Network bandwidth
-   - Storage capacity
+   - Network bandwidth for embedding generation
+   - Storage capacity for templates
 
 2. Scaling Considerations
    - Single replica initially
@@ -154,13 +170,13 @@
    - Backup solutions
 
 2. Security
-   - Secrets management
+   - Full authentication system
    - Network policies
    - Security scanning
    - Access controls
 
 3. Performance
    - Resource optimization
-   - Network tuning
+   - Embedding generation optimization
    - Cache implementation
    - Load balancing improvements
