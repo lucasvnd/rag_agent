@@ -2,9 +2,25 @@ import pytest
 from typing import List, Dict, Any
 import numpy as np
 from uuid import UUID
+from supabase import create_client
+from openai import OpenAI
+import os
+from dotenv import load_dotenv
 
 from services.vector_store import VectorStore
 from models.chunks import Chunk, ChunkCreate
+
+load_dotenv()
+
+@pytest.fixture
+def supabase_client():
+    url = os.getenv("SUPABASE_URL")
+    key = os.getenv("SUPABASE_KEY")
+    return create_client(url, key)
+
+@pytest.fixture
+def openai_client():
+    return OpenAI()
 
 @pytest.fixture
 def vector_store(db_session):
@@ -156,4 +172,48 @@ async def test_error_handling(vector_store: VectorStore):
             user_id=UUID('12345678-1234-5678-1234-567812345678'),
             query_embedding=[0.1],  # Invalid dimension
             limit=3
-        ) 
+        )
+
+async def test_vector_store_operations(supabase_client, openai_client):
+    # Test data
+    test_content = "This is a test document for vector operations."
+    test_user_id = "test_user"
+    
+    # Generate embedding
+    response = await openai_client.embeddings.create(
+        model="text-embedding-ada-002",
+        input=test_content
+    )
+    embedding = response.data[0].embedding
+    
+    # Insert into Supabase
+    result = await supabase_client.table('documents').insert({
+        "content": test_content,
+        "embedding": embedding,
+        "user_id": test_user_id,
+        "filename": "test.txt",
+        "file_type": "text/plain",
+        "metadata": {"test": True}
+    }).execute()
+    
+    assert result.data is not None
+    
+    # Test search
+    search_result = await supabase_client.rpc(
+        'match_documents',
+        {
+            "query_embedding": embedding,
+            "match_threshold": 0.7,
+            "match_count": 1,
+            "p_user_id": test_user_id
+        }
+    ).execute()
+    
+    assert len(search_result.data) > 0
+    assert search_result.data[0]["content"] == test_content
+    
+    # Cleanup
+    await supabase_client.table('documents').delete().eq("user_id", test_user_id).execute()
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"]) 
