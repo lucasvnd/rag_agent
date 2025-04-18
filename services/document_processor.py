@@ -6,6 +6,7 @@ from datetime import datetime
 import aiofiles
 import os
 from contextlib import asynccontextmanager
+from docx import Document as DocxDocument
 
 from models.documents import Document, DocumentCreate, DocumentStatus, DocumentChunk
 
@@ -110,8 +111,11 @@ class DocumentProcessor:
 
     async def generate_chunks(self, document: Document) -> List[DocumentChunk]:
         """Generate chunks from a document."""
-        if document.filename.lower().endswith('.pdf'):
+        file_extension = document.filename.lower()
+        if file_extension.endswith('.pdf'):
             return await self._process_pdf(document)
+        elif file_extension.endswith('.docx'):
+            return await self._process_docx(document)
         else:
             raise ValueError(f"Unsupported file type: {document.filename}")
 
@@ -167,6 +171,54 @@ class DocumentProcessor:
                 
             except Exception as e:
                 raise DocumentProcessingError(f"Error processing PDF: {str(e)}")
+
+    async def _process_docx(self, document: Document) -> List[DocumentChunk]:
+        """Process a DOCX document and return chunks."""
+        chunks = []
+        
+        async with self._managed_file(document.file_path) as temp_path:
+            try:
+                # Process DOCX in a separate thread to avoid blocking
+                loop = asyncio.get_event_loop()
+                chunks = await loop.run_in_executor(None, self._process_docx_sync, document, temp_path)
+                return chunks
+            except Exception as e:
+                raise DocumentProcessingError(f"Error processing DOCX: {str(e)}")
+
+    def _process_docx_sync(self, document: Document, file_path: Path) -> List[DocumentChunk]:
+        """Synchronous DOCX processing to be run in a thread pool."""
+        chunks = []
+        try:
+            doc = DocxDocument(file_path)
+            
+            # Update document metadata with only required information
+            document.metadata.update({
+                "user_id": document.user_id,
+                "document_name": document.filename
+            })
+            
+            # Process each paragraph as a chunk
+            text_content = []
+            for paragraph in doc.paragraphs:
+                if paragraph.text.strip():
+                    text_content.append(paragraph.text)
+            
+            # Create a single chunk with all text content
+            if text_content:
+                chunk = DocumentChunk(
+                    document_id=document.id,
+                    user_id=document.user_id,
+                    content="\n".join(text_content),
+                    metadata={
+                        "source": "docx"
+                    }
+                )
+                chunks.append(chunk)
+            
+            return chunks
+                
+        except Exception as e:
+            raise DocumentProcessingError(f"Error processing DOCX: {str(e)}")
 
     async def generate_embeddings(self, chunks: List[Dict]) -> List[Dict]:
         """Generate embeddings for chunks."""
