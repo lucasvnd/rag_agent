@@ -1,74 +1,46 @@
 import os
+import sys
 import pytest
-from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, patch
+from pathlib import Path
 
-# Import your FastAPI app to create test client
-# Adjust the import path based on your actual application structure
-from main import app
+# Add the project root directory to Python path
+project_root = Path(__file__).parent.parent
+sys.path.append(str(project_root))
 
-@pytest.fixture
-def test_client():
-    """Return a FastAPI TestClient which uses the app."""
-    return TestClient(app)
+from services.document_processor import DocumentProcessor
 
 @pytest.fixture
-def mock_supabase():
-    """Create a mock Supabase client."""
-    mock = MagicMock()
-    
-    # Configure the mock to return predictable responses
-    # Adjust these based on your actual Supabase methods used
-    mock.table().select().execute.return_value = {"data": []}
-    mock.storage().from_().upload.return_value = {"Key": "test-file.pdf"}
-    
-    return mock
+def temp_dir(tmp_path):
+    """Provide a temporary directory for test files."""
+    return tmp_path
 
 @pytest.fixture
-def sample_pdf():
-    """Return sample PDF content for testing."""
-    # This is a minimal PDF file for testing purposes
-    return b"%PDF-1.3\n1 0 obj\n<</Type/Catalog/Pages 2 0 R>>\nendobj\n2 0 obj\n<</Type/Pages/Kids[3 0 R]/Count 1>>\nendobj\n3 0 obj\n<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>\nendobj\nxref\n0 4\n0000000000 65535 f \n0000000010 00000 n \n0000000053 00000 n \n0000000102 00000 n \ntrailer\n<</Size 4/Root 1 0 R>>\nstartxref\n178\n%%EOF"
-
-@pytest.fixture
-def sample_docx():
-    """Return sample DOCX content for testing."""
-    # This is not actual DOCX content, but a placeholder
-    # In a real test, you might read this from a file in the fixtures directory
-    return b"Sample DOCX content"
-
-@pytest.fixture
-def sample_txt():
-    """Return sample text content for testing."""
-    return b"This is a sample text document for testing.\nIt has multiple lines.\nEach line contains text that can be processed."
-
-@pytest.fixture
-def sample_embedding():
-    """Return a sample vector embedding for testing."""
-    # A small sample vector - actual embeddings would be larger
-    import numpy as np
-    return np.random.rand(1536).tolist()  # OpenAI embeddings are 1536 dimensions
-
-@pytest.fixture
-def mock_openai():
-    """Create a mock OpenAI client for embeddings."""
-    mock = MagicMock()
-    
-    # Configure the mock to return predictable responses
-    mock.embeddings.create.return_value = {
-        "data": [
-            {
-                "embedding": [0.1] * 1536,  # Simple repeated value for testing
-                "index": 0,
-                "object": "embedding"
-            }
-        ],
-        "model": "text-embedding-ada-002",
-        "object": "list",
-        "usage": {
-            "prompt_tokens": 8,
-            "total_tokens": 8
-        }
+def test_user():
+    """Provide a test user for document processing."""
+    return {
+        "id": "test_user_id",
+        "name": "Test User"
     }
+
+@pytest.fixture
+def db_session():
+    """Mock database session for testing."""
+    class MockSession:
+        async def __aenter__(self):
+            return self
+        
+        async def __aexit__(self, exc_type, exc_val, exc_tb):
+            pass
+        
+        async def commit(self):
+            pass
+        
+        async def rollback(self):
+            pass
     
-    return mock 
+    return MockSession()
+
+@pytest.fixture
+def document_processor(db_session, temp_dir):
+    """Create a DocumentProcessor instance for testing."""
+    return DocumentProcessor(db_session, temp_dir) 
