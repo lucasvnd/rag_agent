@@ -42,6 +42,9 @@ graph TD
 2.  **Service Layer Pattern:** Encapsulate core business logic (document processing, embedding generation, template analysis).
 3.  **Strategy Pattern:** Potentially used for handling different document file types and template suggestions.
 4.  **Unit of Work Pattern:** Manage database transactions, especially when storing document chunks and embeddings.
+5.  **Test-Driven Development Pattern:** Write tests before implementation to ensure requirements are met.
+6.  **Fixture Pattern:** Reuse test fixtures across different test cases.
+7.  **Mock Pattern:** Isolate components for testing by mocking dependencies.
 
 ## Component Relationships
 
@@ -66,6 +69,66 @@ graph LR
    - Authentication
    - Error handling
    - Monitoring
+
+## Testing Patterns
+
+### Test Organization
+```mermaid
+graph TD
+    A[Tests] --> B[Unit Tests]
+    A --> C[Integration Tests]
+    A --> D[API Tests]
+    B --> B1[Document Processing]
+    B --> B2[Embedding Generation]
+    B --> B3[Template Management]
+    C --> C1[Supabase Integration]
+    C --> C2[End-to-End Flows]
+    D --> D1[File Endpoint]
+    D --> D2[Chat Endpoint]
+```
+
+1. **Test Categorization**
+   - Unit tests for isolated components
+   - Integration tests for component interactions
+   - API tests for endpoint functionality
+   - Fixtures for test data reuse
+
+2. **Test Data Management**
+   - Sample documents in multiple formats
+   - Mock responses for external services
+   - Standardized test vectors for embeddings
+   - Shared fixtures across test categories
+
+3. **Mocking Strategy**
+   - Mock Supabase client for vector operations
+   - Mock embedding generation for deterministic results
+   - Simulate file uploads for API testing
+   - Provide predictable responses for external dependencies
+
+4. **Continuous Integration**
+   - GitHub Actions workflow for automated testing
+   - Test coverage reporting
+   - Pull request validation through tests
+   - Pre-merge test verification
+
+### Test Coverage Goals
+1. **Core Functionality**
+   - Document processing: 90%+
+   - API endpoints: 90%+
+   - Supabase integration: 80%+
+   - Template management: 80%+
+
+2. **Error Handling**
+   - Invalid file types
+   - Supabase connection issues
+   - Embedding generation failures
+   - Missing or corrupted documents
+
+3. **Edge Cases**
+   - Large documents
+   - Complex document structures
+   - Rate limiting scenarios
+   - Unusual input queries
 
 ## Deployment Patterns
 

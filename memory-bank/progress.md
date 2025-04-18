@@ -9,6 +9,8 @@
 4.  **Containerization:** Basic Dockerfile and `docker-compose.yml` exist.
 5.  **Template Examples:** Sample templates stored in the `/templates` directory.
 6.  **Database Schema:** Initial migration created for Supabase integration with document processing focus.
+7.  **Testing Infrastructure:** Comprehensive test suite with unit, integration, and API tests using pytest.
+8.  **Continuous Integration:** GitHub Actions workflow for automated testing.
 
 ## Current Status (Phase 1 In Progress)
 
@@ -18,6 +20,17 @@
 3.  **Database Schema:** Created SQL migration for document chunks and template metadata tables.
 4.  **Project Scope:** Clarified and aligned all documentation with the correct RAG-based document processing focus.
 5.  **Code Cleanup:** Removed unused files and components not related to our project scope.
+6.  **Testing Framework:** Implemented test fixtures, mocks, and test cases for all core functionality.
+
+### Testing Infrastructure
+1.  **Test Organization:** Structured tests into unit, integration, and API categories.
+2.  **Test Fixtures:** Created reusable fixtures for document samples, Supabase mocks, and embeddings.
+3.  **Mocking Strategy:** Implemented mocks for external services like Supabase and OpenAI.
+4.  **Document Processing Tests:** Created tests for PDF, DOCX, and TXT processing and chunking.
+5.  **API Endpoint Tests:** Implemented tests for `/file` and `/chat` endpoints.
+6.  **Integration Tests:** Created tests for Supabase vector database interactions.
+7.  **CI Pipeline:** Set up GitHub Actions workflow for test automation with coverage reporting.
+8.  **Testing Documentation:** Created TESTING_STRATEGY.md with comprehensive guidelines.
 
 ### Version Control Workflow
 1.  **Repository:** GitHub repository at `lucasvnd/rag_agent` manages project code.
@@ -45,7 +58,11 @@
 ## What's Left to Build
 
 ### Phase 1: Core Functionality
-1.  **Supabase Integration:**
+1.  **Implementation to Pass Tests:**
+    *   Develop document processor services.
+    *   Implement API endpoints following test specifications.
+    *   Create Supabase repository layer with vector search.
+2.  **Supabase Integration:**
     *   Implement connection to Supabase vector database.
     *   Create repository/service layer for document storage.
     *   Set up document chunking and embedding logic.
