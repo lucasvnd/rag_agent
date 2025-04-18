@@ -1,17 +1,18 @@
 # Active Context
 
 ## Current Focus
--   Establishing the core FastAPI application structure with two main endpoints: `/file` and `/chat`.
+-   Finalizing project scope alignment across all documentation and code.
 -   Setting up Supabase integration for vector storage of processed documents.
 -   Implementing document processing, chunking, and embedding functionality.
--   Setting up the template directory structure with sample templates.
--   Implementing analysis to suggest appropriate templates based on document content.
+-   Maintaining version control through GitHub with systematic commits.
+-   Preparing API structure for the `/file` and `/chat` endpoints.
 
 ## Recent Changes
 -   Reviewed and updated all core Memory Bank files to align with the clarified project scope: Document processing with RAG and template suggestion.
 -   Updated database approach to use Supabase vector store for document storage.
 -   Corrected the API endpoint structure to focus on `/file` and `/chat` endpoints.
--   Clarified that templates are stored in the /templates folder and deployed with the Docker container.
+-   Removed irrelevant code and files that were not aligned with the project scope.
+-   Committed all changes to GitHub with descriptive commit messages.
 
 ## Active Decisions
 1.  **Core Stack:** Python 3.11, FastAPI, Supabase (vector database).
@@ -19,6 +20,12 @@
 3.  **Template Storage:** Templates stored in the /templates directory, deployed with the Docker container.
 4.  **API Endpoints:** Two main endpoints - `/file` for document upload and `/chat` for interactions.
 5.  **Deployment:** Docker Swarm on VPS for production deployment.
+6.  **Version Control:** 
+    * GitHub repository (lucasvnd/rag_agent) with protected main branch
+    * Feature branch workflow for all changes
+    * Pull request reviews before merging to main
+    * Descriptive commit messages following conventional commits format
+    * Regular commits for incremental changes
 
 ## Next Steps (Phase 1 Implementation)
 1.  **Supabase Integration:**
@@ -42,6 +49,7 @@
 -   Optimizing chunking and embedding processes for performance.
 -   Ensuring proper integration with Supabase.
 -   Defining appropriate algorithms for template suggestion based on document content.
+-   Maintaining clear version control with descriptive commits.
 
 ## Known Issues
 -   None currently identified related to the new focus.
@@ -51,4 +59,5 @@
 -   Supabase client for Python
 -   Document processing libraries (python-docx, PyPDF2/pdfplumber)
 -   OpenAI or similar for embeddings
--   Docker, Docker Swarm 
+-   Docker, Docker Swarm
+-   Git/GitHub for version control 
