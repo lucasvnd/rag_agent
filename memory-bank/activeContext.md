@@ -1,57 +1,65 @@
 # Active Context
 
 ## Current Focus
-- Implementing DOCX processing functionality
-- Maintaining consistent async/sync operations across document types
-- Ensuring proper error handling and resource management
-- Setting up Supabase integration for vector storage of processed documents
+- Project structure cleanup and organization
+- Consolidating services into app/services directory
+- Maintaining clean architecture with Supabase integration
+- Setting up proper template management with background processing
 
 ## Recent Changes
-- Added DOCX processing with proper async/sync operations
-- Implemented DOCX text extraction with python-docx
-- Maintained consistent error handling and resource management
-- Added test cases for DOCX processing
-- Added python-docx dependency
+- Consolidated all services into app/services directory
+- Merged template repository functionality into TemplateProcessor service
+- Removed unnecessary directories (migrations, database, src, etc.)
+- Cleaned up project structure for better maintainability
+- Implemented async template processing with background tasks
 
 ## Active Decisions
 1. **Core Stack:** Python 3.11, FastAPI, Supabase (vector database)
-2. **Document Processing:** 
+2. **Project Structure:**
+   - All services consolidated in app/services
+   - Clean separation of concerns with models and services
+   - Template storage in /templates directory
+   - No local database, using Supabase for storage
+3. **Document Processing:** 
    - Using PyPDF2 for PDF processing with async wrapper
    - Using python-docx for DOCX processing with async wrapper
    - Running document processing in thread pool to avoid blocking
    - Implementing safe file handling with size limits (100MB)
-   - Using temporary file management for processing
-3. **Error Handling:**
+4. **Template Management:**
+   - Templates stored in /templates directory
+   - Metadata stored in JSON format
+   - Background processing for template analysis
+   - Async operations for better performance
+5. **Error Handling:**
    - Specific exception types for different error scenarios
    - Proper error context preservation
    - Validation for file existence and size
-4. **Resource Management:**
+6. **Resource Management:**
    - Async file operations with aiofiles
    - Automatic cleanup of temporary files
    - Managed file context for safe processing
-5. **Template Storage:** Templates stored in the /templates directory, deployed with the Docker container
-6. **API Endpoints:** Two main endpoints - `/file` for document upload and `/chat` for interactions
-7. **Deployment:** Docker Swarm on VPS for production deployment
+7. **API Endpoints:** Two main endpoints - `/file` for document upload and `/chat` for interactions
 
-## Next Steps (Phase 1 Implementation)
-1. **Document Processing:**
-   - Implement TXT parsing functionality
+## Next Steps
+1. **Template Processing:**
+   - Implement template analysis in background tasks
+   - Add template suggestion logic based on document content
+   - Enhance template metadata management
+2. **Document Processing:**
+   - Complete TXT parsing functionality
    - Enhance chunking algorithm for better text segmentation
-2. **Supabase Integration:**
+3. **Supabase Integration:**
    - Setup connection to Supabase for vector storage
    - Implement document chunking and embedding functionality
-   - Store processed documents in Supabase vector database
-3. **API Implementation:**
-   - Implement logic for `POST /file`: Handle document upload, processing, chunking, and storage
-   - Implement logic for `POST /chat`: Process user queries against stored documents
+   - Store processed documents in vector database
 
 ## Current Considerations
-- Monitoring and logging for file processing operations
-- Memory usage optimization for large files
-- Security implications of temporary file storage
+- Monitoring and logging for template processing
+- Memory usage optimization for large templates
+- Security implications of template storage
 - Performance optimization of async operations
 - Ensuring proper cleanup of resources
-- Defining appropriate algorithms for template suggestion based on document content
+- Testing coverage for template management
 
 ## Known Issues
 - None currently identified
