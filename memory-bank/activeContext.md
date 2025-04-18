@@ -1,54 +1,67 @@
 # Active Context
 
 ## Current Focus
--   Establishing the core FastAPI application structure with two main endpoints: `/file` and `/chat`.
--   Setting up Supabase integration for vector storage of processed documents.
--   Implementing document processing, chunking, and embedding functionality.
--   Setting up the template directory structure with sample templates.
--   Implementing analysis to suggest appropriate templates based on document content.
+- Improving and hardening the document processing functionality
+- Implementing proper async/sync operations in document processing
+- Enhancing error handling and resource management
+- Setting up Supabase integration for vector storage of processed documents
 
 ## Recent Changes
--   Reviewed and updated all core Memory Bank files to align with the clarified project scope: Document processing with RAG and template suggestion.
--   Updated database approach to use Supabase vector store for document storage.
--   Corrected the API endpoint structure to focus on `/file` and `/chat` endpoints.
--   Clarified that templates are stored in the /templates folder and deployed with the Docker container.
+- Enhanced PDF processing with proper async/sync operations
+- Improved error handling with specific exception types
+- Added resource management for temporary files
+- Implemented file size limits and validation
+- Added async file operations using aiofiles
+- Added proper cleanup of temporary processing files
 
 ## Active Decisions
-1.  **Core Stack:** Python 3.11, FastAPI, Supabase (vector database).
-2.  **Document Processing:** Support for document formats like DOCX, PDF, TXT using appropriate libraries.
-3.  **Template Storage:** Templates stored in the /templates directory, deployed with the Docker container.
-4.  **API Endpoints:** Two main endpoints - `/file` for document upload and `/chat` for interactions.
-5.  **Deployment:** Docker Swarm on VPS for production deployment.
+1. **Core Stack:** Python 3.11, FastAPI, Supabase (vector database)
+2. **Document Processing:** 
+   - Using PyPDF2 for PDF processing with async wrapper
+   - Running PDF processing in thread pool to avoid blocking
+   - Implementing safe file handling with size limits (100MB)
+   - Using temporary file management for processing
+3. **Error Handling:**
+   - Specific exception types for different error scenarios
+   - Proper error context preservation
+   - Validation for file existence and size
+4. **Resource Management:**
+   - Async file operations with aiofiles
+   - Automatic cleanup of temporary files
+   - Managed file context for safe processing
+5. **Template Storage:** Templates stored in the /templates directory, deployed with the Docker container
+6. **API Endpoints:** Two main endpoints - `/file` for document upload and `/chat` for interactions
+7. **Deployment:** Docker Swarm on VPS for production deployment
 
 ## Next Steps (Phase 1 Implementation)
-1.  **Supabase Integration:**
-    *   Setup connection to Supabase for vector storage.
-    *   Implement document chunking and embedding functionality.
-    *   Store processed documents in Supabase vector database.
-2.  **API Implementation:**
-    *   Implement logic for `POST /file`: Handle document upload, processing, chunking, and storage.
-    *   Implement logic for `POST /chat`: Process user queries against stored documents.
-3.  **Document Analysis:**
-    *   Implement logic to analyze document content.
-    *   Develop algorithm to suggest appropriate templates from the /templates directory.
-4.  **Template Management:**
-    *   Organize and catalog existing templates in the /templates directory.
-    *   Implement logic to access and utilize templates for suggestions.
-5.  **Testing:** Add basic unit/integration tests for API endpoints and document processing.
+1. **Document Processing:**
+   - Implement DOCX parsing functionality
+   - Implement TXT parsing functionality
+   - Enhance chunking algorithm for better text segmentation
+2. **Supabase Integration:**
+   - Setup connection to Supabase for vector storage
+   - Implement document chunking and embedding functionality
+   - Store processed documents in Supabase vector database
+3. **API Implementation:**
+   - Implement logic for `POST /file`: Handle document upload, processing, chunking, and storage
+   - Implement logic for `POST /chat`: Process user queries against stored documents
 
 ## Current Considerations
--   Error handling for document uploads and processing.
--   Security implications of storing and processing documents.
--   Optimizing chunking and embedding processes for performance.
--   Ensuring proper integration with Supabase.
--   Defining appropriate algorithms for template suggestion based on document content.
+- Monitoring and logging for file processing operations
+- Memory usage optimization for large files
+- Security implications of temporary file storage
+- Performance optimization of async operations
+- Ensuring proper cleanup of resources
+- Defining appropriate algorithms for template suggestion based on document content
 
 ## Known Issues
--   None currently identified related to the new focus.
+- None currently identified
 
 ## Dependencies
--   FastAPI, Uvicorn
--   Supabase client for Python
--   Document processing libraries (python-docx, PyPDF2/pdfplumber)
--   OpenAI or similar for embeddings
--   Docker, Docker Swarm 
+- FastAPI, Uvicorn
+- PyPDF2 for PDF processing
+- aiofiles for async file operations
+- Supabase client for Python
+- Document processing libraries (python-docx to be implemented)
+- OpenAI or similar for embeddings
+- Docker, Docker Swarm 
